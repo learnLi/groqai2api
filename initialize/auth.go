@@ -27,5 +27,9 @@ func InitAuth() {
 		}
 	}
 
+	// 支持从环境变量中设置单独账号
+	if os.Getenv("SESSION_TOKEN") != "" {
+		Secrets = append(Secrets, groq.NewAccount(os.Getenv("SESSION_TOKEN"), ""))
+	}
 	global.AccountPool = accountpool.NewAccounts(Secrets)
 }

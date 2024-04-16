@@ -22,8 +22,11 @@ func InitRouter() *gin.Engine {
 			"message": "pong",
 		})
 	})
+
+	AuthGroup := Router.Group("/auth/")
+	router.InitAuth(AuthGroup)
 	v1Group := Router.Group("/v1/")
-	router.InitRouter(v1Group)
+	router.InitChat(v1Group)
 
 	return Router
 }

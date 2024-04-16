@@ -23,3 +23,26 @@ func Authorization(c *gin.Context) {
 	}
 	c.Next()
 }
+
+func AuthSecret(c *gin.Context) {
+	if global.OpenAuthSecret != "true" {
+		c.JSON(401, gin.H{"error": "未开放功能"})
+		c.Abort()
+		return
+	}
+	authHeader := c.GetHeader("Authorization")
+	if global.AuthSecret != "" {
+		if authHeader == "" {
+			c.JSON(401, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+		if global.AuthSecret == strings.Replace(authHeader, "Bearer ", "", 1) {
+			c.Next()
+		}
+		c.JSON(401, gin.H{"error": "Unauthorized"})
+		c.Abort()
+		return
+	}
+	c.Next()
+}

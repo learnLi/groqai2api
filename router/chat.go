@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	groq "github.com/learnLi/groq_client"
 	"groqai2api/global"
+	"groqai2api/middlewares"
 	"net/http"
 	"strings"
 	"time"
@@ -99,6 +100,7 @@ func chat(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	c.Writer.Flush()
 	defer response.Body.Close()
 	groq.NewReadWriter(c.Writer, response).StreamHandler()
 }
@@ -161,10 +163,11 @@ func models(c *gin.Context) {
 	c.JSON(http.StatusOK, mo)
 }
 
-func InitRouter(Router *gin.RouterGroup) {
+func InitChat(Router *gin.RouterGroup) {
 	Router.GET("models", models)
 	ChatRouter := Router.Group("chat")
 	{
+		ChatRouter.OPTIONS("/completions", middlewares.Options)
 		ChatRouter.POST("/completions", chat)
 	}
 }

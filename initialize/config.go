@@ -18,4 +18,13 @@ func InitConfig() {
 	}
 	global.ChinaPrompt = os.Getenv("CHINA_PROMPT")
 	global.Authorization = os.Getenv("Authorization")
+	global.OpenAuthSecret = os.Getenv("OpenAuthSecret")
+	global.AuthSecret = os.Getenv("AuthSecret")
+	if global.AuthSecret == "" {
+		if global.Authorization == "" {
+			global.AuthSecret = "root"
+		} else {
+			global.AuthSecret = global.Authorization
+		}
+	}
 }
