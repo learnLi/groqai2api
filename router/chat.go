@@ -75,6 +75,12 @@ func chat(c *gin.Context) {
 		}
 	}
 
+	if account == nil {
+		c.JSON(400, gin.H{"error": "found account"})
+		c.Abort()
+		return
+	}
+
 	// 默认插入中文prompt
 	if global.ChinaPrompt == "true" {
 		prompt := groq.APIMessage{
@@ -135,6 +141,12 @@ func models(c *gin.Context) {
 				}
 			}
 		}
+	}
+
+	if account == nil {
+		c.JSON(400, gin.H{"error": "found account"})
+		c.Abort()
+		return
 	}
 
 	if _, ok := global.Cache.Get(account.Organization); !ok {
