@@ -37,12 +37,11 @@ func AuthSecret(c *gin.Context) {
 			c.Abort()
 			return
 		}
-		if global.AuthSecret == strings.Replace(authHeader, "Bearer ", "", 1) {
-			c.Next()
+		if global.AuthSecret != strings.Replace(authHeader, "Bearer ", "", 1) {
+			c.JSON(401, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
 		}
-		c.JSON(401, gin.H{"error": "Unauthorized"})
-		c.Abort()
-		return
 	}
 	c.Next()
 }
