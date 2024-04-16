@@ -33,7 +33,6 @@ func getList(c *gin.Context) {
 }
 
 func addTokens(c *gin.Context) {
-	// todo:: 添加账号
 	token := c.PostForm("session_token")
 	// 支持多账号添加，使用,号分隔
 	var tokens []string
