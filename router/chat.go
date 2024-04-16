@@ -163,6 +163,7 @@ func models(c *gin.Context) {
 }
 
 func InitChat(Router *gin.RouterGroup) {
+	Router.Use(middlewares.Authorization)
 	Router.GET("models", models)
 	ChatRouter := Router.Group("chat")
 	{

@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: Groqai2api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
