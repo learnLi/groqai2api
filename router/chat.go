@@ -100,7 +100,6 @@ func chat(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	c.Writer.Flush()
 	defer response.Body.Close()
 	groq.NewReadWriter(c.Writer, response).StreamHandler()
 }
