@@ -6,6 +6,7 @@ import (
 	groq "github.com/learnLi/groq_client"
 	"groqai2api/global"
 	"groqai2api/middlewares"
+	"groqai2api/pkg/bogdanfinn"
 	"net/http"
 	"strings"
 	"time"
@@ -42,7 +43,7 @@ func chat(c *gin.Context) {
 			"error": err.Error(),
 		})
 	}
-	client := groq.NewBasicClient()
+	client := bogdanfinn.NewStdClient()
 	proxyUrl := global.ProxyPool.GetProxyIP()
 	if proxyUrl != "" {
 		client.SetProxy(proxyUrl)
@@ -111,7 +112,7 @@ func chat(c *gin.Context) {
 }
 
 func models(c *gin.Context) {
-	client := groq.NewBasicClient()
+	client := bogdanfinn.NewStdClient()
 	proxyUrl := global.ProxyPool.GetProxyIP()
 	if proxyUrl != "" {
 		client.SetProxy(proxyUrl)
