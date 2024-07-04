@@ -19,7 +19,7 @@ func InitConfig() {
 	}
 	global.SupportApikey = os.Getenv("SUPPORT_APIKEY")
 	global.ApiKeyPrefix = os.Getenv("API_KEY_PREFIX")
-	if global.SupportApikey == "" {
+	if global.ApiKeyPrefix == "" {
 		global.ApiKeyPrefix = "gsk_"
 	}
 	sessionTokenLenStr := os.Getenv("SESSION_TOKEN_LEN")
