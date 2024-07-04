@@ -12,6 +12,18 @@ import (
 	"time"
 )
 
+var (
+	SupportModels = map[string]string{
+		"gemma2-9b-it":       "gemma2-9b-it",
+		"gemma-7b-it":        "gemma-7b-it",
+		"llama3-70b-8192":    "llama3-70b-8192",
+		"llama3-8b-8192":     "llama3-8b-8192",
+		"mixtral-8x7b-32768": "mixtral-8x7b-32768",
+		"gpt-3.5-turbo":      "llama3-70b-8192",
+		"gpt-4":              "llama3-70b-8192",
+	}
+)
+
 func authSessionHandler(client groq.HTTPClient, account *groq.Account, api_key string, proxy string) error {
 	organization, err := groq.GerOrganizationId(client, api_key, proxy)
 	if err != nil {
@@ -47,6 +59,25 @@ func chat(c *gin.Context) {
 			"error": err.Error(),
 		})
 	}
+
+	if apiReq.Model != "" {
+		if strings.HasPrefix(apiReq.Model, "gpt-3.5") {
+			apiReq.Model = "gpt-3.5-turbo"
+		}
+
+		if strings.HasPrefix(apiReq.Model, "gpt-4") {
+			apiReq.Model = "gpt-4"
+		}
+	} else {
+		// 防呆，给默认值
+		apiReq.Model = "llama3-70b-8192"
+	}
+
+	// 处理模型映射
+	if _, ok := SupportModels[apiReq.Model]; ok {
+		apiReq.Model = SupportModels[apiReq.Model]
+	}
+
 	// 默认插入中文prompt
 	if global.ChinaPrompt == "true" {
 		prompt := groq.APIMessage{
