@@ -7,13 +7,16 @@ import (
 )
 
 var (
-	Cache          *cache.Cache
-	Host           string
-	Port           string
-	ChinaPrompt    string
-	ProxyPool      *proxypool.IProxy
-	Authorization  string
-	OpenAuthSecret string
-	AccountPool    *accountpool.IAccounts
-	AuthSecret     string
+	Cache           *cache.Cache
+	Host            string
+	Port            string
+	ChinaPrompt     string
+	ProxyPool       *proxypool.IProxy
+	Authorization   string
+	OpenAuthSecret  string
+	AccountPool     *accountpool.IAccounts
+	AuthSecret      string
+	SupportApikey   string
+	ApiKeyPrefix    string
+	SessionTokenLen int
 )

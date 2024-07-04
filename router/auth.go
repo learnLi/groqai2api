@@ -60,6 +60,7 @@ func addTokens(c *gin.Context) {
 
 func InitAuth(Router *gin.RouterGroup) {
 	Router.Use(middlewares.AuthSecret)
+
 	Router.POST("add", addTokens)
 	Router.POST("list", getList)
 }

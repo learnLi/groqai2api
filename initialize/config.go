@@ -4,6 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"groqai2api/global"
 	"os"
+	"strconv"
 )
 
 func InitConfig() {
@@ -16,6 +17,18 @@ func InitConfig() {
 	if global.Port == "" {
 		global.Port = "8080"
 	}
+	global.SupportApikey = os.Getenv("SUPPORT_APIKEY")
+	global.ApiKeyPrefix = os.Getenv("API_KEY_PREFIX")
+	if global.SupportApikey == "" {
+		global.ApiKeyPrefix = "gsk_"
+	}
+	sessionTokenLenStr := os.Getenv("SESSION_TOKEN_LEN")
+	if sessionTokenLenStr == "" {
+		global.SessionTokenLen = 44
+	} else {
+		global.SessionTokenLen, _ = strconv.Atoi(sessionTokenLenStr)
+	}
+
 	global.ChinaPrompt = os.Getenv("CHINA_PROMPT")
 	global.Authorization = os.Getenv("Authorization")
 	global.OpenAuthSecret = os.Getenv("OpenAuthSecret")

@@ -7,7 +7,7 @@ require (
 	github.com/bogdanfinn/tls-client v1.7.4
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
-	github.com/learnLi/groq_client v0.0.0-20240414221959-b5f3e2c36d1c
+	github.com/learnLi/groq_client v0.0.0-20240427144612-4893d6defe61
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 )
 

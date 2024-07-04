@@ -37,12 +37,25 @@ func authRefreshHandler(client groq.HTTPClient, account *groq.Account, api_key s
 }
 
 func chat(c *gin.Context) {
-	var api_req groq.APIRequest
-	if err := c.ShouldBindJSON(&api_req); err != nil {
+	var (
+		isApiKey = false
+		apiKey   string
+		apiReq   groq.APIRequest
+	)
+	if err := c.ShouldBindJSON(&apiReq); err != nil {
 		c.JSON(500, gin.H{
 			"error": err.Error(),
 		})
 	}
+	// 默认插入中文prompt
+	if global.ChinaPrompt == "true" {
+		prompt := groq.APIMessage{
+			Content: "使用中文回答，输出时不要带英文",
+			Role:    "system",
+		}
+		apiReq.Messages = append([]groq.APIMessage{prompt}, apiReq.Messages...)
+	}
+
 	client := bogdanfinn.NewStdClient()
 	proxyUrl := global.ProxyPool.GetProxyIP()
 	if proxyUrl != "" {
@@ -54,6 +67,12 @@ func chat(c *gin.Context) {
 	if authorization != "" {
 		customToken := strings.Replace(authorization, "Bearer ", "", 1)
 		if customToken != "" {
+			// 如果支持apikey调用，且以gsk_开头的字符串，说明传递的是apikey
+			if global.SupportApikey == "true" && strings.HasPrefix(customToken, global.ApiKeyPrefix) {
+				isApiKey = true
+				apiKey = customToken
+				account = groq.NewAccount(customToken, "")
+			}
 			// 说明传递的是session_token
 			if strings.HasPrefix(customToken, "eyJhbGciOiJSUzI1NiI") {
 				account = groq.NewAccount("", "")
@@ -64,7 +83,7 @@ func chat(c *gin.Context) {
 					return
 				}
 			}
-			if len(customToken) == 44 {
+			if len(customToken) == global.SessionTokenLen {
 				account = groq.NewAccount(customToken, "")
 				err := authRefreshHandler(client, account, customToken, "")
 				if err != nil {
@@ -82,24 +101,20 @@ func chat(c *gin.Context) {
 		return
 	}
 
-	// 默认插入中文prompt
-	if global.ChinaPrompt == "true" {
-		prompt := groq.APIMessage{
-			Content: "使用中文回答，输出时不要带英文",
-			Role:    "system",
+	if !isApiKey {
+		if _, ok := global.Cache.Get(account.Organization); !ok {
+			err := authRefreshHandler(client, account, account.SessionToken, "")
+			if err != nil {
+				c.JSON(400, gin.H{"error": err.Error()})
+				c.Abort()
+				return
+			}
 		}
-		api_req.Messages = append([]groq.APIMessage{prompt}, api_req.Messages...)
+		cacheKey, _ := global.Cache.Get(account.Organization)
+		apiKey = cacheKey.(string)
 	}
-	if _, ok := global.Cache.Get(account.Organization); !ok {
-		err := authRefreshHandler(client, account, account.SessionToken, "")
-		if err != nil {
-			c.JSON(400, gin.H{"error": err.Error()})
-			c.Abort()
-			return
-		}
-	}
-	api_key, _ := global.Cache.Get(account.Organization)
-	response, err := groq.ChatCompletions(client, api_req, api_key.(string), account.Organization, "")
+
+	response, err := groq.ChatCompletions(client, apiReq, apiKey, account.Organization, "")
 	if err != nil {
 		c.JSON(500, gin.H{
 			"error": err.Error(),
