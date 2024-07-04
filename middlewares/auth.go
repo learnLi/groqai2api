@@ -14,8 +14,8 @@ func Authorization(c *gin.Context) {
 			c.Abort()
 			return
 		}
-
-		if global.Authorization != strings.Replace(authHeader, "Bearer ", "", 1) {
+		// 支持官方apikey调用会跳过Authorization验证
+		if global.SupportApikey != "true" && global.Authorization != strings.Replace(authHeader, "Bearer ", "", 1) {
 			c.JSON(401, gin.H{"error": "Unauthorized"})
 			c.Abort()
 			return
