@@ -4,6 +4,7 @@ https://groq.com/
 
 # docker 参数
 
+
 - SERVER_PORT 端口
 - SERVER_HOST 域名
 - SUPPORT_APIKEY 支持官方的apikey调用,支持官方apikey调用会跳过Authorization验证（不想被滥用，慎重开启）

@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
 	groq "github.com/learnLi/groq_client"
 	"groqai2api/global"
@@ -49,11 +50,7 @@ func authRefreshHandler(client groq.HTTPClient, account *groq.Account, api_key s
 }
 
 func chat(c *gin.Context) {
-	var (
-		isApiKey = false
-		apiKey   string
-		apiReq   groq.APIRequest
-	)
+	var apiReq groq.APIRequest
 	if err := c.ShouldBindJSON(&apiReq); err != nil {
 		c.JSON(500, gin.H{
 			"error": err.Error(),
@@ -95,54 +92,11 @@ func chat(c *gin.Context) {
 
 	authorization := c.Request.Header.Get("Authorization")
 	account := global.AccountPool.Get()
-	if authorization != "" {
-		customToken := strings.Replace(authorization, "Bearer ", "", 1)
-		if customToken != "" {
-			// 如果支持apikey调用，且以gsk_开头的字符串，说明传递的是apikey
-			if global.SupportApikey == "true" && strings.HasPrefix(customToken, global.ApiKeyPrefix) {
-				isApiKey = true
-				apiKey = customToken
-				account = groq.NewAccount(customToken, "")
-			}
-			// 说明传递的是session_token
-			if strings.HasPrefix(customToken, "eyJhbGciOiJSUzI1NiI") {
-				account = groq.NewAccount("", "")
-				err := authSessionHandler(client, account, customToken, "")
-				if err != nil {
-					c.JSON(400, gin.H{"error": err.Error()})
-					c.Abort()
-					return
-				}
-			}
-			if len(customToken) == global.SessionTokenLen {
-				account = groq.NewAccount(customToken, "")
-				err := authRefreshHandler(client, account, customToken, "")
-				if err != nil {
-					c.JSON(400, gin.H{"error": err.Error()})
-					c.Abort()
-					return
-				}
-			}
-		}
-	}
-
-	if account == nil {
-		c.JSON(400, gin.H{"error": "found account"})
+	apiKey, err := processAPIKey(client, authorization, account)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
 		c.Abort()
 		return
-	}
-
-	if !isApiKey {
-		if _, ok := global.Cache.Get(account.Organization); !ok {
-			err := authRefreshHandler(client, account, account.SessionToken, "")
-			if err != nil {
-				c.JSON(400, gin.H{"error": err.Error()})
-				c.Abort()
-				return
-			}
-		}
-		cacheKey, _ := global.Cache.Get(account.Organization)
-		apiKey = cacheKey.(string)
 	}
 
 	response, err := groq.ChatCompletions(client, apiReq, apiKey, account.Organization, "")
@@ -165,47 +119,14 @@ func models(c *gin.Context) {
 	}
 	authorization := c.Request.Header.Get("Authorization")
 	account := global.AccountPool.Get()
-	if authorization != "" {
-		customToken := strings.Replace(authorization, "Bearer ", "", 1)
-		if customToken != "" {
-			// 说明传递的是session_token
-			if strings.HasPrefix(customToken, "eyJhbGciOiJSUzI1NiI") {
-				account = groq.NewAccount("", "")
-				err := authSessionHandler(client, account, customToken, "")
-				if err != nil {
-					c.JSON(400, gin.H{"error": err.Error()})
-					c.Abort()
-					return
-				}
-			}
-			if len(customToken) == 44 {
-				account = groq.NewAccount(customToken, "")
-				err := authRefreshHandler(client, account, customToken, "")
-				if err != nil {
-					c.JSON(400, gin.H{"error": err.Error()})
-					c.Abort()
-					return
-				}
-			}
-		}
-	}
-
-	if account == nil {
-		c.JSON(400, gin.H{"error": "found account"})
+	apiKey, err := processAPIKey(client, authorization, account)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
 		c.Abort()
 		return
 	}
-
-	if _, ok := global.Cache.Get(account.Organization); !ok {
-		err := authRefreshHandler(client, account, account.SessionToken, "")
-		if err != nil {
-			c.JSON(400, gin.H{"error": err.Error()})
-			c.Abort()
-			return
-		}
-	}
-	api_key, _ := global.Cache.Get(account.Organization)
-	response, err := groq.GetModels(client, api_key.(string), account.Organization, "")
+	response, err := groq.GetModels(client, apiKey, account.Organization, "")
+	defer response.Body.Close()
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		c.Abort()
@@ -219,6 +140,55 @@ func models(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, mo)
+}
+
+func processAPIKey(client groq.HTTPClient, authorization string, account *groq.Account) (string, error) {
+	var (
+		isApiKey = false
+		apiKey   string
+	)
+	if authorization != "" {
+		customToken := strings.Replace(authorization, "Bearer ", "", 1)
+		if customToken != "" {
+			// 如果支持apikey调用，且以gsk_开头的字符串，说明传递的是apikey
+			if global.SupportApikey == "true" && strings.HasPrefix(customToken, global.ApiKeyPrefix) {
+				isApiKey = true
+				apiKey = customToken
+				account = groq.NewAccount(customToken, "")
+			}
+			// 说明传递的是session_token
+			if strings.HasPrefix(customToken, "eyJhbGciOiJSUzI1NiI") {
+				account = groq.NewAccount("", "")
+				err := authSessionHandler(client, account, customToken, "")
+				if err != nil {
+					return "", err
+				}
+			}
+			if len(customToken) == global.SessionTokenLen {
+				account = groq.NewAccount(customToken, "")
+				err := authRefreshHandler(client, account, customToken, "")
+				if err != nil {
+					return "", err
+				}
+			}
+		}
+	}
+
+	if account == nil {
+		return "", errors.New("found account")
+	}
+
+	if !isApiKey {
+		if _, ok := global.Cache.Get(account.Organization); !ok {
+			err := authRefreshHandler(client, account, account.SessionToken, "")
+			if err != nil {
+				return "", err
+			}
+		}
+		cacheKey, _ := global.Cache.Get(account.Organization)
+		apiKey = cacheKey.(string)
+	}
+	return apiKey, nil
 }
 
 func InitChat(Router *gin.RouterGroup) {

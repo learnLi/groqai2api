@@ -4,6 +4,8 @@ github.com/bogdanfinn/fhttp v0.5.28 h1:G6thT8s8v6z1IuvXMUsX9QKy3ZHseTQTzxuIhSiaa
 github.com/bogdanfinn/fhttp v0.5.28/go.mod h1:oJiYPG3jQTKzk/VFmogH8jxjH5yiv2rrOH48Xso2lrE=
 github.com/bogdanfinn/tls-client v1.7.4 h1:8cn2/egs0LmqA7RFgrQh9Ww074lyQkeMKmsYl9JluTQ=
 github.com/bogdanfinn/tls-client v1.7.4/go.mod h1:pQwF0eqfL0gf0mu8hikvu6deZ3ijSPruJDzEKEnnXjU=
+github.com/bogdanfinn/tls-client v1.7.5 h1:R1aTwe5oja5niLnQggzbWnzJEssw9n+3O4kR0H/Tjl4=
+github.com/bogdanfinn/tls-client v1.7.5/go.mod h1:pQwF0eqfL0gf0mu8hikvu6deZ3ijSPruJDzEKEnnXjU=
 github.com/bogdanfinn/utls v1.6.1 h1:dKDYAcXEyFFJ3GaWaN89DEyjyRraD1qb4osdEK89ass=
 github.com/bogdanfinn/utls v1.6.1/go.mod h1:VXIbRZaiY/wHZc6Hu+DZ4O2CgTzjhjCg/Ou3V4r/39Y=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
@@ -66,6 +68,8 @@ github.com/learnLi/groq_client v0.0.0-20240427005157-65e9884f0bc8 h1:0fnZSImEoFK
 github.com/learnLi/groq_client v0.0.0-20240427005157-65e9884f0bc8/go.mod h1:ylHOkKv58DneSdOo/EuYcMOrKwD4mv2GX0SXKhtK8fM=
 github.com/learnLi/groq_client v0.0.0-20240427144612-4893d6defe61 h1:uKlqbiezBD7Cd31srdcgiKYRpynWg8naarA9njXPqLI=
 github.com/learnLi/groq_client v0.0.0-20240427144612-4893d6defe61/go.mod h1:ylHOkKv58DneSdOo/EuYcMOrKwD4mv2GX0SXKhtK8fM=
+github.com/learnLi/groq_client v0.0.0-20240713065518-97694197a4dc h1:3dWLxW4NseZpE6ZaOsLwyex08Bfs2Tsu38VGs0OtFrU=
+github.com/learnLi/groq_client v0.0.0-20240713065518-97694197a4dc/go.mod h1:ylHOkKv58DneSdOo/EuYcMOrKwD4mv2GX0SXKhtK8fM=
 github.com/leodido/go-urn v1.2.4 h1:XlAE/cm/ms7TE/VMVoduSpNBoyc2dOxHs5MZSwAN63Q=
 github.com/leodido/go-urn v1.2.4/go.mod h1:7ZrI8mTSeBSHl/UaRyKQW1qZeMgak41ANeCNaVckg+4=
 github.com/mattn/go-isatty v0.0.19 h1:JITubQf0MOLdlGRuRq+jtsDlekdYPia9ZFsB8h/APPA=

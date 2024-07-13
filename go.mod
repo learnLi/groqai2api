@@ -4,10 +4,10 @@ go 1.21
 
 require (
 	github.com/bogdanfinn/fhttp v0.5.28
-	github.com/bogdanfinn/tls-client v1.7.4
+	github.com/bogdanfinn/tls-client v1.7.5
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
-	github.com/learnLi/groq_client v0.0.0-20240427144612-4893d6defe61
+	github.com/learnLi/groq_client v0.0.0-20240713065518-97694197a4dc
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 )
 
