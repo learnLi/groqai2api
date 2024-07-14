@@ -91,8 +91,8 @@ func chat(c *gin.Context) {
 	}
 
 	authorization := c.Request.Header.Get("Authorization")
-	account := global.AccountPool.Get()
-	apiKey, err := processAPIKey(client, authorization, account)
+
+	account, apiKey, err := processAPIKey(client, authorization)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		c.Abort()
@@ -118,8 +118,7 @@ func models(c *gin.Context) {
 		client.SetProxy(proxyUrl)
 	}
 	authorization := c.Request.Header.Get("Authorization")
-	account := global.AccountPool.Get()
-	apiKey, err := processAPIKey(client, authorization, account)
+	account, apiKey, err := processAPIKey(client, authorization)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		c.Abort()
@@ -142,11 +141,12 @@ func models(c *gin.Context) {
 	c.JSON(http.StatusOK, mo)
 }
 
-func processAPIKey(client groq.HTTPClient, authorization string, account *groq.Account) (string, error) {
+func processAPIKey(client groq.HTTPClient, authorization string) (*groq.Account, string, error) {
 	var (
 		isApiKey = false
 		apiKey   string
 	)
+	account := global.AccountPool.Get()
 	if authorization != "" {
 		customToken := strings.Replace(authorization, "Bearer ", "", 1)
 		if customToken != "" {
@@ -161,34 +161,34 @@ func processAPIKey(client groq.HTTPClient, authorization string, account *groq.A
 				account = groq.NewAccount("", "")
 				err := authSessionHandler(client, account, customToken, "")
 				if err != nil {
-					return "", err
+					return account, "", err
 				}
 			}
 			if len(customToken) == global.SessionTokenLen {
 				account = groq.NewAccount(customToken, "")
 				err := authRefreshHandler(client, account, customToken, "")
 				if err != nil {
-					return "", err
+					return account, "", err
 				}
 			}
 		}
 	}
 
 	if account == nil {
-		return "", errors.New("found account")
+		return account, "", errors.New("found account")
 	}
 
 	if !isApiKey {
 		if _, ok := global.Cache.Get(account.Organization); !ok {
 			err := authRefreshHandler(client, account, account.SessionToken, "")
 			if err != nil {
-				return "", err
+				return account, "", err
 			}
 		}
 		cacheKey, _ := global.Cache.Get(account.Organization)
 		apiKey = cacheKey.(string)
 	}
-	return apiKey, nil
+	return account, apiKey, nil
 }
 
 func InitChat(Router *gin.RouterGroup) {
