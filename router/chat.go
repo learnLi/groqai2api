@@ -154,7 +154,7 @@ func processAPIKey(client groq.HTTPClient, authorization string) (*groq.Account,
 			if global.SupportApikey == "true" && strings.HasPrefix(customToken, global.ApiKeyPrefix) {
 				isApiKey = true
 				apiKey = customToken
-				account = groq.NewAccount(customToken, "")
+				account = groq.NewAccountWithAPIKey(customToken, "", true)
 			}
 			// 说明传递的是session_token
 			if strings.HasPrefix(customToken, "eyJhbGciOiJSUzI1NiI") {
@@ -178,7 +178,7 @@ func processAPIKey(client groq.HTTPClient, authorization string) (*groq.Account,
 		return account, "", errors.New("found account")
 	}
 
-	if !isApiKey {
+	if !isApiKey && !account.IsAPIKey {
 		if _, ok := global.Cache.Get(account.Organization); !ok {
 			err := authRefreshHandler(client, account, account.SessionToken, "")
 			if err != nil {
@@ -187,8 +187,9 @@ func processAPIKey(client groq.HTTPClient, authorization string) (*groq.Account,
 		}
 		cacheKey, _ := global.Cache.Get(account.Organization)
 		apiKey = cacheKey.(string)
+		return account, apiKey, nil
 	}
-	return account, apiKey, nil
+	return account, account.SessionToken, nil
 }
 
 func InitChat(Router *gin.RouterGroup) {

@@ -28,5 +28,8 @@ func InitRouter() *gin.Engine {
 	v1Group := Router.Group("/v1/")
 	router.InitChat(v1Group)
 
+	PlatformGroup := Router.Group("/platform/")
+	router.InitPlatform(PlatformGroup)
+
 	return Router
 }

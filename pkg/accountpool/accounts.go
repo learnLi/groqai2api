@@ -3,6 +3,7 @@ package accountpool
 import (
 	"errors"
 	groq "github.com/learnLi/groq_client"
+	"strings"
 	"sync"
 )
 
@@ -49,7 +50,7 @@ func (a *IAccounts) Add(tokens []string) error {
 	}
 	for _, token := range tokens {
 		if _, exists := existingTokens[token]; !exists {
-			a.Accounts = append(a.Accounts, groq.NewAccount(token, ""))
+			a.Accounts = AddAccount(a.Accounts, token)
 			existingTokens[token] = struct{}{} // Add to set to prevent duplicates within the input tokens.
 		}
 	}
@@ -58,4 +59,17 @@ func (a *IAccounts) Add(tokens []string) error {
 
 func NewAccounts(accounts []*groq.Account) *IAccounts {
 	return &IAccounts{Accounts: accounts}
+}
+
+func AddAccount(Secrets []*groq.Account, token string) []*groq.Account {
+	if !checkIsAPIKEY(token) {
+		Secrets = append(Secrets, groq.NewAccount(token, ""))
+	} else {
+		Secrets = append(Secrets, groq.NewAccountWithAPIKey(token, "", true))
+	}
+	return Secrets
+}
+
+func checkIsAPIKEY(token string) bool {
+	return strings.HasPrefix(token, "gsk_")
 }

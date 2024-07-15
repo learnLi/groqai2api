@@ -14,7 +14,7 @@ func validateTokenWithComma(tokens []string) ([]string, error) {
 		return nil, errors.New("token is empty")
 	}
 	for _, token := range tokens {
-		if token != "" && len(token) == 44 {
+		if token != "" && len(token) == 44 || strings.HasPrefix(token, global.ApiKeyPrefix) {
 			newTokens = append(newTokens, token)
 		}
 	}
