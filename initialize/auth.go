@@ -23,13 +23,13 @@ func InitAuth() {
 				continue
 			}
 			// Append to accounts
-			accountpool.AddAccount(Secrets, token)
+			Secrets = accountpool.AddAccount(Secrets, token)
 		}
 	}
 
 	// 支持从环境变量中设置单独账号
 	if os.Getenv("SESSION_TOKEN") != "" {
-		accountpool.AddAccount(Secrets, os.Getenv("SESSION_TOKEN"))
+		Secrets = accountpool.AddAccount(Secrets, os.Getenv("SESSION_TOKEN"))
 	}
 	global.AccountPool = accountpool.NewAccounts(Secrets)
 }
